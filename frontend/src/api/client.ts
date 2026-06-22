@@ -2,14 +2,17 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
 import { getStoredToken } from '../utils/storage'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000'
+const baseURL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000'
 
-export const apiClient = axios.create({
+export const api = axios.create({
   baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
 })
+
+export const apiClient = api
+
 
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getStoredToken()
