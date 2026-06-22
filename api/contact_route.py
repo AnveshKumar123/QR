@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy import select
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.dependencies import get_valid_qr, get_current_user
@@ -99,10 +99,11 @@ async def scan_qr(
 async def call_contact(
     request: Request,
     public_code: str,
+    idempotent_key: str | None = Header(None, description="Unique idempotency key for preventing duplicate requests"),
     _: None = Depends(rate_limit_dependency(5, 15)),
     db: AsyncSession = Depends(get_db),
 ):
-    idem_key = _require_idempotency_key(request)
+    idem_key = idempotent_key or _require_idempotency_key(request)
 
     try:
         qr = await get_valid_qr(public_code, db)
@@ -141,10 +142,11 @@ async def message_contact(
     request: Request,
     public_code: str,
     payload: MessageRequest,
+    idempotent_key: str | None = Header(None, description="Unique idempotency key for preventing duplicate requests"),
     _: None = Depends(rate_limit_dependency(5, 15)),
     db: AsyncSession = Depends(get_db),
 ):
-    idem_key = _require_idempotency_key(request)
+    idem_key = idempotent_key or _require_idempotency_key(request)
 
     try:
         qr = await get_valid_qr(public_code, db)
@@ -183,10 +185,11 @@ async def message_contact(
 async def notify_contact(
     request: Request,
     public_code: str,
+    idempotent_key: str | None = Header(None, description="Unique idempotency key for preventing duplicate requests"),
     _: None = Depends(rate_limit_dependency(5, 15)),
     db: AsyncSession = Depends(get_db),
 ):
-    idem_key = _require_idempotency_key(request)
+    idem_key = idempotent_key or _require_idempotency_key(request)
 
     try:
         qr = await get_valid_qr(public_code, db)
