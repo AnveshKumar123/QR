@@ -21,10 +21,10 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <OneSignalSetup />
         <ThemeProvider>
           <ToastProvider>
             <AuthProvider>
+              <OneSignalSetup />
               <UnreadMessagesProvider>
                 <AppRoutes />
               </UnreadMessagesProvider>
