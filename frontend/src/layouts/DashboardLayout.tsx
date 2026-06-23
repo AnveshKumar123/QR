@@ -1,4 +1,4 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 
 import { Button } from '../components/ui/Button'
 import { NotificationBadge } from '../components/ui/NotificationBadge'
@@ -10,6 +10,8 @@ export function DashboardLayout() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const { unreadCount } = useUnreadMessages()
+  const location = useLocation()
+  const isMessagesPage = location.pathname === '/messages'
 
   return (
     <div className="min-h-screen">
@@ -21,7 +23,7 @@ export function DashboardLayout() {
             </Link>
             <Link to="/messages" className="relative text-sm text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100">
               Messages
-              <NotificationBadge count={unreadCount} />
+              {!isMessagesPage && <NotificationBadge count={unreadCount} />}
             </Link>
           </div>
           <div className="flex items-center gap-3">

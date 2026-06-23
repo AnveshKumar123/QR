@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getMessages, markMessageRead } from '../api/contact'
+import { getMessages, markMessageRead, markAllMessagesRead } from '../api/contact'
 import type { Message } from '../types/contact'
 import { useAuth } from '../context/AuthContext'
+import { useUnreadMessages } from '../context/UnreadMessagesContext'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 
@@ -21,6 +22,7 @@ function formatRelativeTime(dateString: string): string {
 
 export function MessagesPage() {
   const { isAuthenticated } = useAuth()
+  const { refetchUnreadCount } = useUnreadMessages()
   const queryClient = useQueryClient()
 
   const { data: messages, isLoading, error } = useQuery({
@@ -34,6 +36,15 @@ export function MessagesPage() {
     mutationFn: markMessageRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] })
+      refetchUnreadCount()
+    },
+  })
+
+  const markAllAsReadMutation = useMutation({
+    mutationFn: markAllMessagesRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] })
+      refetchUnreadCount()
     },
   })
 
@@ -62,7 +73,18 @@ export function MessagesPage() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Messages</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Messages</h1>
+        {messages && messages.some((m) => !m.is_read) && (
+          <Button
+            onClick={() => markAllAsReadMutation.mutate()}
+            variant="secondary"
+            disabled={markAllAsReadMutation.isPending}
+          >
+            Mark All Read
+          </Button>
+        )}
+      </div>
       <div className="space-y-4">
         {messages.map((message: Message) => (
           <Card

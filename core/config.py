@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     REDIS_ENABLED: bool = False
 
+    # OneSignal settings
+    ONESIGNAL_APP_ID: str = ""
+    ONESIGNAL_REST_API_KEY: str = ""
+    ONESIGNAL_ENABLED: bool = False
+
     class Config:
         env_file = ".env"
         extra = "ignore"

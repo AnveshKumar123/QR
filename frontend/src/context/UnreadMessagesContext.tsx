@@ -14,6 +14,7 @@ interface UnreadMessagesContextValue {
   setUnreadCount: (count: number) => void
   incrementUnread: () => void
   decrementUnread: () => void
+  refetchUnreadCount: () => Promise<void>
 }
 
 const UnreadMessagesContext = createContext<UnreadMessagesContextValue | undefined>(
@@ -48,6 +49,20 @@ export function UnreadMessagesProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval)
   }, [isAuthenticated])
 
+  const refetchUnreadCount = useCallback(async () => {
+    if (!isAuthenticated) {
+      setUnreadCount(0)
+      return
+    }
+    try {
+      const messages = await getMessages()
+      const unread = messages.filter((m) => !m.is_read).length
+      setUnreadCount(unread)
+    } catch (error) {
+      console.error('Failed to refetch unread count:', error)
+    }
+  }, [isAuthenticated])
+
   const incrementUnread = useCallback(() => {
     setUnreadCount((prev) => prev + 1)
   }, [])
@@ -58,7 +73,7 @@ export function UnreadMessagesProvider({ children }: { children: ReactNode }) {
 
   return (
     <UnreadMessagesContext.Provider
-      value={{ unreadCount, setUnreadCount, incrementUnread, decrementUnread }}
+      value={{ unreadCount, setUnreadCount, incrementUnread, decrementUnread, refetchUnreadCount }}
     >
       {children}
     </UnreadMessagesContext.Provider>

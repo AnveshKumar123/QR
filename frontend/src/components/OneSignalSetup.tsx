@@ -1,7 +1,10 @@
 import { useEffect } from 'react'
 import OneSignal from 'react-onesignal'
+import { useAuth } from '../context/AuthContext'
 
 export function OneSignalSetup() {
+  const { user } = useAuth()
+
   useEffect(() => {
     const initOneSignal = async () => {
       try {
@@ -17,6 +20,14 @@ export function OneSignalSetup() {
 
     initOneSignal()
   }, [])
+
+  // Set external user ID when user logs in
+  useEffect(() => {
+    if (user?.id) {
+      OneSignal.login(String(user.id))
+      console.log('OneSignal external user ID set:', user.id)
+    }
+  }, [user?.id])
 
   return null
 }

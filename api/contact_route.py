@@ -11,6 +11,7 @@ from db.base import get_db
 from models.models import AttemptStatus, ContactAction, Message, Users
 from services.create_qr import create_contact_attempt, get_attempt_by_idempotency
 from services.rate_liimiter import rate_limit_dependency
+from services.onesignal_service import send_push_notification
 
 router = APIRouter()
 
@@ -170,6 +171,13 @@ async def message_contact(
             twilio_sid=None,
         )
 
+        # Send push notification
+        await send_push_notification(
+            user_id=qr.user_id,
+            message=f"New message from {payload.sender_name or 'Anonymous'}: {payload.message}",
+            title="New QR Message",
+        )
+
     logger.info("message_contact: recorded message attempt", extra={"length": len(payload.message)})
     return await _record_contact_action(
         db,
@@ -258,3 +266,23 @@ async def mark_message_read(
     await db.commit()
     
     return {"message": "Message marked as read"}
+
+
+@router.patch("/messages/read-all")
+async def mark_all_messages_read(
+    current_user: Users = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Mark all messages as read for the current user."""
+    result = await db.execute(
+        select(Message)
+        .where(Message.recipient_id == current_user.id, Message.is_read == False)
+    )
+    messages = result.scalars().all()
+    
+    for message in messages:
+        message.is_read = True
+    
+    await db.commit()
+    
+    return {"message": f"Marked {len(messages)} messages as read"}

@@ -57,3 +57,8 @@ export async function markMessageRead(messageId: number): Promise<{ message: str
   const { data } = await apiClient.patch<{ message: string }>(`/api/messages/${messageId}/read`)
   return data
 }
+
+export async function markAllMessagesRead(): Promise<{ message: string }> {
+  const { data } = await apiClient.patch<{ message: string }>('/api/messages/read-all')
+  return data
+}
