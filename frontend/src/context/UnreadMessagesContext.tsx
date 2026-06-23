@@ -4,7 +4,10 @@ import {
   useState,
   type ReactNode,
   useCallback,
+  useEffect,
 } from 'react'
+import { getMessages } from '../api/contact'
+import { useAuth } from './AuthContext'
 
 interface UnreadMessagesContextValue {
   unreadCount: number
@@ -19,6 +22,31 @@ const UnreadMessagesContext = createContext<UnreadMessagesContextValue | undefin
 
 export function UnreadMessagesProvider({ children }: { children: ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0)
+  const { isAuthenticated } = useAuth()
+
+  // Fetch unread count on mount and when auth state changes
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUnreadCount(0)
+      return
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const messages = await getMessages()
+        const unread = messages.filter((m) => !m.is_read).length
+        setUnreadCount(unread)
+      } catch (error) {
+        console.error('Failed to fetch unread count:', error)
+      }
+    }
+
+    fetchUnreadCount()
+
+    // Refetch every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000)
+    return () => clearInterval(interval)
+  }, [isAuthenticated])
 
   const incrementUnread = useCallback(() => {
     setUnreadCount((prev) => prev + 1)

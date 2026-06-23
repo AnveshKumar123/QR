@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { ToastProvider } from './components/ui/Toast'
+import { OneSignalSetup } from './components/OneSignalSetup'
 import { AuthProvider } from './context/AuthContext'
 import { UnreadMessagesProvider } from './context/UnreadMessagesContext'
 import { ThemeProvider } from './hooks/useTheme'
@@ -20,6 +21,7 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        <OneSignalSetup />
         <ThemeProvider>
           <ToastProvider>
             <AuthProvider>
