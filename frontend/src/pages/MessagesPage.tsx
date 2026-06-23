@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { getMessages, markMessageRead } from '../api/contact'
 import type { Message } from '../types/contact'
 import { useAuth } from '../context/AuthContext'
+import { useUnreadMessages } from '../context/UnreadMessagesContext'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 
@@ -21,6 +23,7 @@ function formatRelativeTime(dateString: string): string {
 
 export function MessagesPage() {
   const { isAuthenticated } = useAuth()
+  const { setUnreadCount } = useUnreadMessages()
   const queryClient = useQueryClient()
 
   const { data: messages, isLoading, error } = useQuery({
@@ -29,6 +32,12 @@ export function MessagesPage() {
     enabled: isAuthenticated,
     refetchInterval: 30000, // Refetch every 30 seconds
   })
+
+  // Update unread count whenever messages change
+  const unreadCount = messages?.filter((m) => !m.is_read).length ?? 0
+  useEffect(() => {
+    setUnreadCount(unreadCount)
+  }, [unreadCount, setUnreadCount])
 
   const markAsReadMutation = useMutation({
     mutationFn: markMessageRead,

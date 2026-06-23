@@ -1,12 +1,15 @@
 import { Link, Outlet } from 'react-router-dom'
 
 import { Button } from '../components/ui/Button'
+import { NotificationBadge } from '../components/ui/NotificationBadge'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
+import { useUnreadMessages } from '../context/UnreadMessagesContext'
 
 export function DashboardLayout() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { unreadCount } = useUnreadMessages()
 
   return (
     <div className="min-h-screen">
@@ -16,8 +19,9 @@ export function DashboardLayout() {
             <Link to="/dashboard" className="text-lg font-bold text-brand-700 dark:text-brand-100">
               QR Contact
             </Link>
-            <Link to="/messages" className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100">
+            <Link to="/messages" className="relative text-sm text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100">
               Messages
+              <NotificationBadge count={unreadCount} />
             </Link>
           </div>
           <div className="flex items-center gap-3">

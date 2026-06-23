@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { ToastProvider } from './components/ui/Toast'
 import { AuthProvider } from './context/AuthContext'
+import { UnreadMessagesProvider } from './context/UnreadMessagesContext'
 import { ThemeProvider } from './hooks/useTheme'
 import { AppRoutes } from './routes/AppRoutes'
 
@@ -22,7 +23,9 @@ function App() {
         <ThemeProvider>
           <ToastProvider>
             <AuthProvider>
-              <AppRoutes />
+              <UnreadMessagesProvider>
+                <AppRoutes />
+              </UnreadMessagesProvider>
             </AuthProvider>
           </ToastProvider>
         </ThemeProvider>
